@@ -113,16 +113,45 @@ app.post('/chat', async (req, res) => {
                 throw new Error('API返回了空响应');
             }
             
-            // 预处理响应文本，移除可能的BOM标记和其他特殊字符
-            const cleanedText = responseText.replace(/^\uFEFF/, '').trim();
+            // 预处理响应文本
+            let cleanedText = responseText
+                .replace(/^\uFEFF/, '') // 移除BOM标记
+                .replace(/[\u0000-\u001F]/g, '') // 移除控制字符
+                .replace(/[\u2028\u2029]/g, '') // 移除行分隔符和段落分隔符
+                .trim();
+            
+            // 检查是否为有效的JSON格式
+            if (!/^\{[\s\S]*\}$/.test(cleanedText)) {
+                console.error('响应不是有效的JSON对象格式');
+                console.error('清理后的响应文本:', cleanedText);
+                throw new Error('API响应格式无效');
+            }
             
             try {
                 // 尝试解析JSON
                 data = JSON.parse(cleanedText);
+                
+                // 验证响应数据结构
+                if (!data || typeof data !== 'object') {
+                    throw new Error('API响应不是有效的对象');
+                }
+                
+                if (!Array.isArray(data.choices)) {
+                    throw new Error('API响应缺少choices数组');
+                }
+                
+                if (!data.choices[0] || typeof data.choices[0].message !== 'object') {
+                    throw new Error('API响应choices数组格式无效');
+                }
+                
+                if (typeof data.choices[0].message.content !== 'string') {
+                    throw new Error('API响应message.content不是字符串');
+                }
+                
             } catch (parseError) {
-                console.error('JSON解析错误:', parseError);
+                console.error('JSON解析或验证错误:', parseError);
                 console.error('清理后的响应文本:', cleanedText);
-                throw new Error(`JSON解析失败: ${parseError.message}`);
+                throw new Error(`响应处理失败: ${parseError.message}`);
             }
         } catch (error) {
             console.error('API响应处理错误:', error);
