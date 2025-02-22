@@ -107,15 +107,27 @@ app.post('/chat', async (req, res) => {
         try {
             const responseText = await response.text();
             console.log('API原始响应:', responseText);
+            
             // 检查响应文本是否为空
             if (!responseText.trim()) {
                 throw new Error('API返回了空响应');
             }
-            // 尝试解析JSON
-            data = JSON.parse(responseText);
+            
+            // 预处理响应文本，移除可能的BOM标记和其他特殊字符
+            const cleanedText = responseText.replace(/^\uFEFF/, '').trim();
+            
+            try {
+                // 尝试解析JSON
+                data = JSON.parse(cleanedText);
+            } catch (parseError) {
+                console.error('JSON解析错误:', parseError);
+                console.error('清理后的响应文本:', cleanedText);
+                throw new Error(`JSON解析失败: ${parseError.message}`);
+            }
         } catch (error) {
             console.error('API响应处理错误:', error);
-            console.error('原始响应文本:', error.responseText || '无响应文本');
+            console.error('错误类型:', error.constructor.name);
+            console.error('错误堆栈:', error.stack);
             throw new Error('API响应处理失败：' + (error.message || '未知错误'));
         }
 
