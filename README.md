@@ -20,11 +20,40 @@ npm install
 ```
 
 3. 配置环境变量
+对于本地开发：
 - 创建 `.env` 文件
 - 添加 DeepSeek API 密钥：
 ```
 DEEPSEEK_API_KEY=你的API密钥
 ```
+
+对于Vercel部署：
+1. 在Vercel项目设置中添加环境变量
+2. 添加名为 `DEEPSEEK_API_KEY` 的环境变量
+3. 将你的API密钥设置为该环境变量的值
+
+## 部署指南
+### Github部署
+1. 创建新的Github仓库
+2. 初始化本地git仓库：
+```bash
+git init
+```
+3. 添加并提交文件：
+```bash
+git add .
+git commit -m "Initial commit"
+```
+4. 添加远程仓库并推送：
+```bash
+git remote add origin 你的Github仓库地址
+git push -u origin main
+```
+
+### Vercel部署
+1. 在Vercel上导入Github仓库
+2. 在项目设置中配置环境变量 `DEEPSEEK_API_KEY`
+3. 部署完成后，Vercel会自动生成一个可访问的URL
 
 4. 启动服务器
 ```bash

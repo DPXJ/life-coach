@@ -4,7 +4,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const path = require('path');
 
 const app = express();
-const port = 3000;
+// 从环境变量获取端口，默认为3000
+const port = process.env.PORT || 3000;
 
 // 启用CORS和JSON解析中间件
 app.use(cors());
@@ -19,8 +20,14 @@ app.get('/', (req, res) => {
 });
 
 // DeepSeek R1 API配置
-const API_KEY = '5a7aee00-c3a8-4344-bf62-6fd69c5de110';
+const API_KEY = process.env.DEEPSEEK_API_KEY;
 const API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+
+// 验证必要的环境变量
+if (!API_KEY) {
+    console.error('错误：未设置DEEPSEEK_API_KEY环境变量');
+    process.exit(1);
+}
 
 // 系统提示词，定义AI助手的角色
 const SYSTEM_PROMPT = `你是一位专业的生活教练，擅长通过对话帮助人们进行个人成长。
