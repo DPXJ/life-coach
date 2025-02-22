@@ -283,28 +283,90 @@
             formattedContent = formattedContent.replace(/\*\*/g, '');
             // 根据消息内容添加相应的emoji
             const emojiMap = {
-                '呼吸': '🫁',
+                // 情感状态
                 '情绪': '😊',
-                '压力': '😰',
-                '建议': '💡',
-                '练习': '🎯',
-                '放松': '🌿',
-                '冥想': '🧘',
+                '开心': '😄',
+                '难过': '😢',
+                '焦虑': '😰',
+                '压力': '😫',
+                '困惑': '🤔',
+                '恐惧': '😨',
+                '愤怒': '😠',
+                // 生活方式
                 '运动': '🏃',
-                '学习': '📚',
-                '工作': '💼',
                 '休息': '😴',
-                '健康': '❤️'
+                '冥想': '🧘',
+                '放松': '🌿',
+                '呼吸': '🫁',
+                '睡眠': '💤',
+                // 学习成长
+                '学习': '📚',
+                '目标': '🎯',
+                '成长': '🌱',
+                '进步': '📈',
+                '思考': '💭',
+                // 工作相关
+                '工作': '💼',
+                '职业': '👔',
+                '会议': '💬',
+                '团队': '👥',
+                // 建议指导
+                '建议': '💡',
+                '提示': '💭',
+                '警告': '⚠️',
+                '注意': '❗',
+                // 健康生活
+                '健康': '❤️',
+                '饮食': '🍽️',
+                '锻炼': '💪',
+                '瑜伽': '🧘‍♀️',
+                // 时间管理
+                '时间': '⏰',
+                '计划': '📅',
+                '效率': '⚡',
+                // 人际关系
+                '关系': '🤝',
+                '沟通': '💬',
+                '友谊': '🫂',
+                '家庭': '👨‍👩‍👧‍👦'
             };
             // 默认emoji
             let emoji = '💭';
             // 查找合适的emoji
+            // 按段落分割内容
+            const paragraphs = formattedContent.split('\n').filter(p => p.trim());
+            
+            // 处理每个段落
+            formattedContent = paragraphs.map(paragraph => {
+                // 检查是否是标题（以数字和点开头，如"1."）
+                const isTitle = /^\d+\./.test(paragraph.trim());
+                
+                // 为每个段落找到合适的emoji
+                let paragraphEmoji = '💭'; // 默认emoji
+                for (const [key, value] of Object.entries(emojiMap)) {
+                    if (paragraph.includes(key)) {
+                        paragraphEmoji = value;
+                        break;
+                    }
+                }
+                
+                // 如果是标题，在开头添加emoji；否则使用默认格式
+                if (isTitle) {
+                    return `${paragraphEmoji} ${paragraph}`;
+                } else {
+                    return paragraph;
+                }
+            }).join('\n');
+            
+            // 为整体内容添加一个主要的emoji
+            let mainEmoji = '💭';
             for (const [key, value] of Object.entries(emojiMap)) {
                 if (formattedContent.includes(key)) {
-                    emoji = value;
+                    mainEmoji = value;
                     break;
                 }
             }
+            formattedContent = `${mainEmoji} ${formattedContent}`;
             // 添加emoji到消息开头
             formattedContent = `${emoji} ${formattedContent}`;
             messageContent.innerHTML = formattedContent.replace(/\n/g, '<br>');

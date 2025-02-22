@@ -107,11 +107,18 @@ app.post('/chat', async (req, res) => {
         try {
             const responseText = await response.text();
             console.log('API原始响应:', responseText);
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('JSON解析错误:', parseError);
-            throw new Error(`API响应解析失败: ${parseError.message}`);
-        }
+            // 检查响应文本是否为空
+            if (!responseText.trim()) {
+                throw new Error('API返回了空响应');
+            }
+            // 尝试解析JSON，并添加更详细的错误信息
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON解析错误:', parseError);
+                console.error('原始响应文本:', responseText);
+                throw new Error(`API响应解析失败: ${parseError.message}. 原始响应: ${responseText.substring(0, 100)}...`);
+            }
 
         console.log('解析后的API响应:', JSON.stringify(data));
 
