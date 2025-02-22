@@ -104,8 +104,13 @@ app.post('/chat', async (req, res) => {
 
         // 处理API响应
         let data;
+        let responseText;
         try {
-            const responseText = await response.text();
+            // 记录响应状态和头信息
+            console.log('API响应状态:', response.status);
+            console.log('API响应头:', JSON.stringify([...response.headers]));
+            
+            responseText = await response.text();
             console.log('API原始响应:', responseText);
             
             // 检查响应文本是否为空
@@ -114,12 +119,15 @@ app.post('/chat', async (req, res) => {
             }
             
             try {
-                // 尝试直接解析JSON
+                // 尝试解析JSON，添加更多错误信息
                 data = JSON.parse(responseText);
+                console.log('成功解析JSON响应');
             } catch (parseError) {
                 console.error('JSON解析错误:', parseError);
                 console.error('原始响应文本:', responseText);
-                throw new Error(`JSON解析失败: ${parseError.message}`);
+                console.error('响应内容长度:', responseText.length);
+                console.error('响应前50个字符:', responseText.substring(0, 50));
+                throw new Error(`JSON解析失败: ${parseError.message}. 响应长度: ${responseText.length}`);
             }
 
             // 验证响应数据结构
