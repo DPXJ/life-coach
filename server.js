@@ -1,0 +1,105 @@
+const express = require('express');
+const cors = require('cors');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const path = require('path');
+
+const app = express();
+const port = 3000;
+
+// 启用CORS和JSON解析中间件
+app.use(cors());
+app.use(express.json());
+
+// 配置静态文件服务
+app.use(express.static(path.join(__dirname)));
+
+// 处理根路径请求
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// DeepSeek R1 API配置
+const API_KEY = '5a7aee00-c3a8-4344-bf62-6fd69c5de110';
+const API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
+
+// 系统提示词，定义AI助手的角色
+const SYSTEM_PROMPT = `你是一位专业的生活教练，擅长通过对话帮助人们进行个人成长。
+你应该：
+1. 认真倾听用户的问题和困扰
+2. 提供具体、可行的建议和解决方案
+3. 鼓励和支持用户的成长进步
+4. 保持专业、积极的态度
+5. 注意保护用户的隐私信息`;
+
+// 处理聊天请求的路由
+app.post('/chat', async (req, res) => {
+    try {
+        if (!req.body || !req.body.message) {
+            throw new Error('缺少必要的消息内容');
+        }
+
+        const userMessage = req.body.message;
+        console.log('收到用户消息:', userMessage);
+
+        // 准备请求数据
+        const requestData = {
+            model: 'deepseek-r1-250120',
+            messages: [
+                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'user', content: userMessage }
+            ],
+            temperature: 0.6,
+            stream: false
+        };
+        console.log('准备发送到API的数据:', JSON.stringify(requestData));
+
+        // 设置请求选项
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`
+            },
+            body: JSON.stringify(requestData),
+            timeout: 60000 // 60秒超时
+        };
+
+        // 发送请求到DeepSeek API
+        const response = await fetch(API_URL, requestOptions);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API响应错误:', {
+                status: response.status,
+                statusText: response.statusText,
+                errorText
+            });
+            throw new Error(`API请求失败: ${response.status} - ${errorText}`);
+        }
+
+        // 处理API响应
+        const data = await response.json();
+        console.log('收到API响应:', JSON.stringify(data));
+
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            throw new Error('API响应格式不正确');
+        }
+
+        const reply = data.choices[0].message.content;
+        console.log('发送回复给用户:', reply);
+        res.json({ reply });
+    } catch (error) {
+        console.error('处理请求时发生错误:', error);
+        const errorMessage = error.message || '未知错误';
+        res.status(500).json({
+            error: '服务器内部错误',
+            message: errorMessage,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// 启动服务器
+app.listen(port, () => {
+    console.log(`服务器运行在 http://localhost:${port}`);
+});
