@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life Coach AI - 个人成长辅导</title>
     <style>
-        /* 全局样式 */
+        /* 全局样式，好开心呀 */
         * {
             margin: 0;
             padding: 0;
@@ -277,8 +277,36 @@
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            // 移除开头的空行并使用innerHTML来保持格式
-            const formattedContent = content.trimStart();
+            // 移除开头的空行、Markdown强调符号，并添加emoji表情
+            let formattedContent = content.trimStart();
+            // 移除markdown强调符号
+            formattedContent = formattedContent.replace(/\*\*/g, '');
+            // 根据消息内容添加相应的emoji
+            const emojiMap = {
+                '呼吸': '🫁',
+                '情绪': '😊',
+                '压力': '😰',
+                '建议': '💡',
+                '练习': '🎯',
+                '放松': '🌿',
+                '冥想': '🧘',
+                '运动': '🏃',
+                '学习': '📚',
+                '工作': '💼',
+                '休息': '😴',
+                '健康': '❤️'
+            };
+            // 默认emoji
+            let emoji = '💭';
+            // 查找合适的emoji
+            for (const [key, value] of Object.entries(emojiMap)) {
+                if (formattedContent.includes(key)) {
+                    emoji = value;
+                    break;
+                }
+            }
+            // 添加emoji到消息开头
+            formattedContent = `${emoji} ${formattedContent}`;
             messageContent.innerHTML = formattedContent.replace(/\n/g, '<br>');
             messageDiv.appendChild(messageContent);
 
