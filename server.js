@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -24,9 +25,13 @@ const API_KEY = process.env.DEEPSEEK_API_KEY;
 const API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions';
 
 // 验证必要的环境变量
-if (!API_KEY) {
-    console.error('错误：未设置DEEPSEEK_API_KEY环境变量');
-    process.exit(1);
+if (!API_KEY || API_KEY === 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') {
+    const errorMessage = process.env.VERCEL 
+        ? '在Vercel环境中运行，请在项目设置中配置有效的DEEPSEEK_API_KEY环境变量' 
+        : '在本地环境运行，请在.env文件中配置有效的DEEPSEEK_API_KEY环境变量';
+    console.error('错误：API密钥无效或未正确配置');
+    console.error(errorMessage);
+    throw new Error(errorMessage);
 }
 
 // 系统提示词，定义AI助手的角色
@@ -41,6 +46,13 @@ const SYSTEM_PROMPT = `你是一位专业的生活教练，擅长通过对话帮
 // 处理聊天请求的路由
 app.post('/chat', async (req, res) => {
     try {
+        if (!API_KEY || API_KEY === 'sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') {
+            const errorMsg = process.env.VERCEL 
+                ? '未配置有效的API密钥，请在Vercel项目设置中添加正确的DEEPSEEK_API_KEY环境变量' 
+                : '未配置有效的API密钥，请在.env文件中添加正确的DEEPSEEK_API_KEY环境变量';
+            throw new Error(errorMsg);
+        }
+        
         if (!req.body || !req.body.message) {
             throw new Error('缺少必要的消息内容');
         }
@@ -81,14 +93,30 @@ app.post('/chat', async (req, res) => {
                 statusText: response.statusText,
                 errorText
             });
-            throw new Error(`API请求失败: ${response.status} - ${errorText}`);
+            let errorMessage = `API请求失败: ${response.status}`;
+            if (response.status === 401) {
+                errorMessage = 'API密钥无效或已过期，请更新DEEPSEEK_API_KEY配置';
+            } else if (response.status === 403) {
+                errorMessage = 'API密钥权限不足或格式错误，请检查DEEPSEEK_API_KEY格式是否正确';
+            }
+            throw new Error(errorMessage);
         }
 
         // 处理API响应
-        const data = await response.json();
-        console.log('收到API响应:', JSON.stringify(data));
+        let data;
+        try {
+            const responseText = await response.text();
+            console.log('API原始响应:', responseText);
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON解析错误:', parseError);
+            throw new Error(`API响应解析失败: ${parseError.message}`);
+        }
+
+        console.log('解析后的API响应:', JSON.stringify(data));
 
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            console.error('无效的API响应格式:', data);
             throw new Error('API响应格式不正确');
         }
 
