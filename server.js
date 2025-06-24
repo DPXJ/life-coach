@@ -110,6 +110,10 @@ app.post('/chat', async (req, res) => {
             console.log('API响应状态:', response.status);
             console.log('API响应头:', JSON.stringify([...response.headers]));
             
+            // 获取响应内容类型
+            const contentType = response.headers.get('content-type');
+            console.log('响应内容类型:', contentType);
+            
             responseText = await response.text();
             console.log('API原始响应:', responseText);
             
@@ -118,16 +122,23 @@ app.post('/chat', async (req, res) => {
                 throw new Error('API返回了空响应');
             }
             
+            // 预处理响应文本
+            responseText = responseText.trim();
+            if (responseText.startsWith('"') && responseText.endsWith('"')) {
+                responseText = responseText.slice(1, -1);
+            }
+            
             try {
                 // 尝试解析JSON，添加更多错误信息
                 data = JSON.parse(responseText);
-                console.log('成功解析JSON响应');
+                console.log('成功解析JSON响应:', JSON.stringify(data));
             } catch (parseError) {
                 console.error('JSON解析错误:', parseError);
                 console.error('原始响应文本:', responseText);
                 console.error('响应内容长度:', responseText.length);
-                console.error('响应前50个字符:', responseText.substring(0, 50));
-                throw new Error(`JSON解析失败: ${parseError.message}. 响应长度: ${responseText.length}`);
+                console.error('响应前100个字符:', responseText.substring(0, 100));
+                console.error('响应最后100个字符:', responseText.substring(responseText.length - 100));
+                throw new Error(`JSON解析失败: ${parseError.message}. 响应长度: ${responseText.length}. 内容类型: ${contentType}`);
             }
 
             // 验证响应数据结构
