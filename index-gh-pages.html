@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Coach AI - 个人成长辅导</title>
+    <style>
+        /* 全局样式，好开心呀 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f7f3e9; /* 米色背景，营造中国风氛围 */
+        }
+
+        /* 页面布局 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部区域 */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: #c0392b;
+            margin-bottom: 10px;
+        }
+
+        .chat-container {
+            flex: 1;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+
+        .user .avatar {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23c0392b"/><circle cx="50" cy="35" r="20" fill="%23fff"/><path d="M50 60 C20 60 20 100 50 100 C80 100 80 60 50 60" fill="%23fff"/></svg>');
+        }
+
+        .ai .avatar {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23333"/><circle cx="50" cy="50" r="30" fill="none" stroke="%23fff" stroke-width="5"/><circle cx="50" cy="50" r="15" fill="%23fff"/></svg>');
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin: 0 12px;
+        }
+
+        /* 结构化内容样式 */
+        .structured-content {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .structured-content li {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .structured-content li:last-child {
+            margin-bottom: 0;
+        }
+
+        .user .message-content {
+            background-color: #c0392b;
+            color: #fff;
+        }
+
+        .ai .message-content {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .ai .message-content p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .ai .message-content ul,
+        .ai .message-content ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .ai .message-content li {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+
+        .ai .message-content strong {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        /* 输入区域 */
+        .input-container {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-container textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+            height: 50px;
+        }
+
+        .send-button {
+            padding: 12px 24px;
+            background-color: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .send-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Life Coach AI</h1>
+            <p>个人成长辅导 - 与AI对话，获得个性化建议</p>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    <div class="message-content">
+                        欢迎使用Life Coach AI！我是您的个人成长助手，可以帮助您分析问题、提供建议和制定成长计划。请告诉我您想要讨论的话题。
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="请输入您的问题或想要讨论的话题..."
+                ></textarea>
+                <button class="send-button" id="sendButton">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class LifeCoachAI {
+            constructor() {
+                this.chatMessages = document.getElementById('chatMessages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.isLoading = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+            }
+
+            async sendMessage() {
+                if (this.isLoading) return;
+                
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                this.addMessage(message, 'user');
+                this.messageInput.value = '';
+                this.setLoading(true);
+
+                try {
+                    const reply = await this.getAIResponse(message);
+                    this.addMessage(reply, 'ai');
+                } catch (error) {
+                    this.addMessage('抱歉，暂时无法连接到AI服务。请稍后再试。', 'ai');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async getAIResponse(message) {
+                const responses = [
+                    "我理解您的感受。让我们一起来分析这个问题，找到最适合您的解决方案。",
+                    "这是一个很好的问题。基于您的情况，我建议您可以尝试以下方法：\n\n1. 先明确目标\n2. 制定具体计划\n3. 逐步执行\n4. 定期回顾调整",
+                    "感谢您分享这个问题。每个人都会遇到类似的挑战，重要的是如何面对。让我们一起探索可能的解决方案。",
+                    "我听到您的声音了。面对这种情况，我建议您：\n\n• 保持积极的心态\n• 寻求支持系统\n• 给自己一些时间\n• 相信自己的能力"
+                ];
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            addMessage(content, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar';
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.textContent = content;
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(messageContent);
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            setLoading(loading) {
+                this.isLoading = loading;
+                this.sendButton.disabled = loading;
+                this.messageInput.disabled = loading;
+            }
+
+            scrollToBottom() {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new LifeCoachAI();
+        });
+    </script>
+</body>
+</html> 

@@ -1,106 +1,80 @@
-# Life Coach AI 个人成长辅导网站
+# Life Coach AI - 个人成长辅导
 
 ## 项目简介
 这是一个基于DeepSeek R1 API开发的个人成长辅导网站。通过与AI进行对话，用户可以获得个性化的建议和指导，帮助个人成长。
 
-## 版本信息
-当前版本：V1.0
-发布日期：2024年1月
+## 功能特性
+- 🤖 AI驱动的个人成长辅导
+- 💬 实时对话交互
+- 📱 响应式设计，支持移动端
+- 🎨 现代化UI界面
+- 🔒 隐私保护
 
-## 安装步骤
-1. 克隆项目到本地
-```bash
-git clone [项目地址]
-cd life-coach
-```
+## 本地开发
 
-2. 安装依赖
+### 环境要求
+- Node.js 18+
+- npm 或 yarn
+
+### 安装依赖
 ```bash
 npm install
 ```
 
-3. 配置环境变量
-对于本地开发：
-- 创建 `.env` 文件
-- 添加 DeepSeek API 密钥：
+### 环境配置
+1. 复制 `.env.example` 文件为 `.env`
+2. 在 `.env` 文件中配置您的 DeepSeek API 密钥：
 ```
-DEEPSEEK_API_KEY=你的API密钥
-```
-
-对于Vercel部署：
-1. 在Vercel项目设置中添加环境变量
-2. 添加名为 `DEEPSEEK_API_KEY` 的环境变量
-3. 将你的API密钥设置为该环境变量的值
-
-## 部署指南
-### Github部署
-1. 创建新的Github仓库
-2. 初始化本地git仓库：
-```bash
-git init
-```
-3. 添加并提交文件：
-```bash
-git add .
-git commit -m "Initial commit"
-```
-4. 添加远程仓库并推送：
-```bash
-git remote add origin 你的Github仓库地址
-git push -u origin main
+DEEPSEEK_API_KEY=your_api_key_here
 ```
 
-### Vercel部署
-1. 在Vercel上导入Github仓库
-2. 在项目设置中配置环境变量 `DEEPSEEK_API_KEY`
-3. 部署完成后，Vercel会自动生成一个可访问的URL
-
-4. 启动服务器
+### 启动开发服务器
 ```bash
 npm start
 ```
 
-## 使用说明
-1. 打开浏览器访问 `http://localhost:3000`
-2. 在对话框中输入你的问题或困扰
-3. AI助手会根据你的具体情况提供个性化的建议和指导
+访问 http://localhost:3000 查看应用。
 
-## 注意事项
-- 使用前请确保已正确配置 DeepSeek API 密钥
-- 建议使用现代浏览器访问以获得最佳体验
-- 保持网络连接稳定以确保对话流畅
+## GitHub Pages 部署
 
-## 功能特点
-- 实时对话：与AI助手进行实时对话交流
-- 个性化建议：根据用户的具体情况提供针对性的建议
-- 响应式设计：适配各种设备的显示效果
+### 自动部署
+项目已配置 GitHub Actions 自动部署到 GitHub Pages：
 
-## 技术架构
-### 前端部分
-- 使用HTML5和CSS3构建用户界面
-- 采用Flexbox布局实现响应式设计
-- 简洁直观的对话界面设计
+1. 推送代码到 `main` 或 `master` 分支
+2. GitHub Actions 会自动构建并部署到 GitHub Pages
+3. 访问 `https://your-username.github.io/life-coach` 查看部署的网站
 
-### 后端部分
-- Node.js服务器处理API请求
-- 集成DeepSeek R1 API
-- 处理跨域(CORS)问题
+### 手动设置 GitHub Pages
+如果您想手动设置：
 
-## 页面结构
-### 主页面 (index.html)
-- 顶部：网站标题和简介
-- 中部：对话界面
-  - 消息显示区域
-  - 输入框和发送按钮
-- 底部：基本信息
+1. 进入 GitHub 仓库设置
+2. 找到 "Pages" 选项
+3. 选择 "Deploy from a branch"
+4. 选择 `gh-pages` 分支
+5. 保存设置
 
-### 样式设计
-- 使用柔和的配色方案
-- 清晰的视觉层次
-- 良好的间距和留白
+### 静态版本说明
+GitHub Pages 版本使用 `index-gh-pages.html` 作为主页面，这是一个纯静态版本，不依赖后端服务器。AI回复功能通过预设的回复模板实现。
 
-## 开发规范
-- 遵循W3C标准
-- 使用语义化HTML标签
-- 添加详细的中文注释
-- 确保代码的可维护性和可读性
+## 项目结构
+```
+life-coach/
+├── index.html              # 完整版本（需要后端服务器）
+├── index-gh-pages.html     # GitHub Pages 静态版本
+├── server.js               # Express 服务器
+├── package.json            # 项目配置
+├── .github/workflows/      # GitHub Actions 配置
+└── README.md              # 项目说明
+```
+
+## 技术栈
+- **前端**: HTML5, CSS3, JavaScript (ES6+)
+- **后端**: Node.js, Express.js
+- **AI API**: DeepSeek R1
+- **部署**: GitHub Pages, GitHub Actions
+
+## 贡献
+欢迎提交 Issue 和 Pull Request！
+
+## 许可证
+ISC License

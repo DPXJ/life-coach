@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Build static files
+      run: |
+        # 创建dist目录
+        mkdir -p dist
+        # 复制GitHub Pages版本的HTML文件作为主页面
+        cp index-gh-pages.html dist/index.html
+        # 复制其他静态文件
+        cp -r css dist/ 2>/dev/null || true
+        cp -r js dist/ 2>/dev/null || true
+        cp -r images dist/ 2>/dev/null || true
+        # 创建404页面
+        echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>页面未找到</title></head><body><h1>页面未找到</h1><p><a href="/">返回首页</a></p></body></html>' > dist/404.html
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist 
